@@ -1,0 +1,74 @@
+Michael Shnaiderman mshnai93
+Alona Basovich      alonaba
+
+===============================================
+Exercise 1 – Layer 2 – Advanced Learning Switch
+===============================================
+
+---------------------
+A. Learn the topology
+---------------------
+1. We create a singleton class Discovery with the required callbacks: packetIn,
+port status change, switch up/down.
+2. When the switch is up, an event is received by Discovery callback and:
+	1. LLDP packets are sent on each port of the switch.
+	2. A flow is installed: forward all LLDP packets to controller.
+3. In order to treat LLDP packets we created classes: Port, Switch Connections
+	1. Class Port defines the port of switch, all LLDP packets generated and parsed
+	in this class.
+	2. Class Switch holds all of the switch’s ports and sends LLDP to each one of 
+	the ports when the timer is elapsed (1 sec). Pay attention: each switch has it’s 
+	own timer.
+4. When LLDP packet is received it’s handled by _handle_PacketIn callback of discovery
+class:
+	1. LLDP received: we look in it’s contents: sender’s port MAC, sender’s port number &
+	sender’s Id. We get the same information about receiver from the current connection: 
+	receiver’s port MAC, receiver port no & receiver ID.
+	2. We create two instances of Link that contains <port_Mac, port_no, switch_id> for 
+	sender and for receiver.
+	3. We create the new instance of the SwitchConnection that contains both of the links 
+	and the time stamp: how long the connection is alive.
+	3. If the SwitchConnection instance for this sender and receiver already exists - update
+	the time stamp.
+5. We hold a list of SwitchConnection, each one of it contains time stamp. Using the
+_scan_timestamps function (which is fired using the timer), we check if there exits a link 
+(or links) whose time stamp is greater than 6 sec - i.e no LLDP received for last 6 seconds on 
+link - the connection is removed. This check is run for every 3 seconds.
+6. Discovery contains the list of observers - switches (the instances of Tutorial):
+when spanning tree is updated, the observers make the updates in their tables
+and flows according to the new tree.
+
+Note 1: Timer in the Util.py use the Threads so we define that any thread created
+by the timer is daemon thread (line 120), such that the thread is terminated when
+the main terminates. So we submit also the util.py file.
+
+-----------------------
+B. Find a Spanning Tree
+-----------------------
+Finding a spanning tree is done in a separate class called SpanningTree (in
+SpanningTree.py file). This class is also a singleton, so there would be only one
+tree for the entire network. The calculation is implemented according to the
+standard Kruskal algorithm. When one of the events which requires recalculation of 
+spanning tree is occurred, the calculate_spanning_tree method is called by the
+Discovery class. After calculating Spanning Tree, the class holds the list of the
+active links and the list of inactive links: because each switch must know about
+active and passive links, (it’s not enough to hold only the list of active lists), 
+switch can’t delete all the ports that not in active list, because there are host
+ports that are ignored by the Spanning Tree - so not appear in spanning tree lists.
+
+------------------------------------------------------------------
+C. Change your switch behaviour to avoid sending on forbidden links
+------------------------------------------------------------------
+Each Tutorial instance remembers which ports are active, updates the list if port
+status is changed. When port is down all flows that defines to send data from this
+port are removed. On each update of the spanning tree, the used ports list is updated,
+and ports that declared by the spanning tree as inactive are removed from list of used
+ports, all the flows from inactive ports are removed from the switch too, so no switch 
+would try to send packets through non-active ports (see update_stp function).
+
+-----------------------
+D. Test your controller
+-----------------------
+The controller was tested on all of the provided topologies in topologies.py file.
+In each case we took down links that we knew that are included in the spanning tree,
+so that the controller would realize that and recalculate the tree.

@@ -1,0 +1,48 @@
+Michael Shnaiderman mshnai93
+Alona Basovich      alonaba
+
+=================================
+Exercise 3 – Layer 4 – Simple TCP
+=================================
+
+From optionals we did part 3 and part 4.
+
+Part 1 and 2:
+When socket is open, we run a thread that waits and sorts received packets.
+In listen() and connect() we create a thread with receive_all() method:
+    Using select it receives packets and sorts them:
+        Check for sessions of this socket:
+            if packet is for one of them,
+                add it to the session’s queue.
+            if not: check if state is LISTEN (i.e is server) and packet is SYN
+                treat it within accept() method
+                if state isn’t listen (i.e client)
+                    add message to the main queue
+The method treat_packet in each session defines what to do with the packet
+according to state and type of the packet.
+After syn received at server we create new stcp_socket that is child
+of current socket and the tuple (ip_dst, ip_src, port_dst, port_src) defines the session.
+We hold the sessions in the dictionary of the sessions and for each received packet 
+we check for session to forward this packet.
+
+Part 3:
+At each session we select random init ack‫:‬ randrange(49152, 65535) ‫-‬ we've found it on Wikipedia,
+and for each received packet we send an ack if we received this packet and all the previous packets.
+We hold 3 members:
+seq_num_this - the sequence number of last sent packet
+last_ack_num - the last ack num received
+seq_num_peer - sequence number of the next packet we are waiting from from peer
+When packet with data is received we check
+sequence number + length == seq_num_peer, if yes it is a good packet, it is in order.
+When ack received we check for each unacked packets:
+length(unacked packet) + last_ack_num < ack_received, if yes this ack is acknowledges this packet and it
+will be removed from the list of unacked packets.
+
+Part 4:
+We have an additional thread that runs once in 3 second - timer:
+It checks in the list of unacked packets if they are still unacked:
+Comparing their length + s.n to last ack number, if there are packets that
+weren't acked for more than 3 seconds - retransmit them.
+
+Note: We’ve change Utils.py file - timer’s thread isn’t daemon, so we added this file
+to the submission.

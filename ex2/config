@@ -1,0 +1,62 @@
+router 100
+ports 3
+port 1
+ip 10.0.0.1
+mask 255.255.255.0
+mac AA:00:00:00:00:01
+port 2
+ip 10.1.0.1
+mask 255.255.255.0
+mac AA:01:00:00:00:01
+port 3
+ip 10.1.0.2
+mask 255.255.255.0
+mac AA:01:00:00:00:02
+
+router 101
+ports 3
+port 1
+ip 10.0.1.1
+mask 255.255.255.0
+mac AA:00:00:00:00:02
+port 2
+ip 10.2.0.1
+mask 255.255.255.0
+mac AA:02:00:00:00:01
+port 3
+ip 10.2.0.2
+mask 255.255.255.0
+mac AA:02:00:00:00:02
+
+router 102
+ports 3
+port 1
+ip 10.0.2.1
+mask 255.255.255.0
+mac AA:00:00:00:00:03
+port 2
+ip 10.3.0.1
+mask 255.255.255.0
+mac AA:03:00:00:00:01
+port 3
+ip 10.3.0.2
+mask 255.255.255.0
+mac AA:03:00:00:00:02
+
+link
+left 100,2
+right 101,2
+cost 1
+
+link
+left 100,3
+right 102,3
+cost 1
+
+link
+left 101,3
+right 102,2
+cost 1
+
+reload 60
+

@@ -1,0 +1,55 @@
+Michael Shnaiderman mshnai93
+Alona Basovich      alonaba
+
+==============================================
+Exercise 2 – Layer 3 – Software Defined Router
+==============================================
+
+—————————————————————————---------
+Part 1 – Represent a Routing Table
+—————————————————————————---------
+1. Routing table is implemented as a dictionary, where the key is Subnet (IP of network, Mask), such that for each ip supplied to the constructor, the IP of network is IP&Mask (bitwise And).
+2. For each key, the value saved in the table is <Port_id, next hop IP>, where port id is the port leading to the next hop
+3. When IP address is supplied to the lookup method, we use the method inNetwork (Built In in the IP library) to check if IP is the part of this Network (the same as bitwise And)
+4. The search over the table is the basic search - run over keys of the dictionary.
+
+------------------------------------
+Part 2 – Read the Configuration File
+------------------------------------
+We read the file line by line and create the Graph object that represent the topology, where each Node is Router object (It’s IPs and interfaces) and each Edge is Object that holds Routers participating in the connection and connection’s cost. We also save the list of the networks that exists according to configuration file.
+
+------------------------------
+Part 3 – Compute Shortest Path
+------------------------------
+A. Calculation of Dijkstra is according to Wikipedia.
+B. Compute OSPF - calculate Dijkstra for each route
+
+------------------------------
+Part 4 – Create Routing Tables
+------------------------------
+For given router we compute OSPF and define for each subnet:
+For each subnet connected to this router’s port the destination defined: the next hop IP is none and port is the interface of this router with the ip in the network.
+For IP of remote subnets, the destination is defined by IP of the next hop router and the port leading to the next hop.
+
+-------------------
+Part 5 – Handle ARP
+-------------------
+Exactly according to the description of the exercise
+
+---------------------------
+Part 6 – Send ICMP Messages
+---------------------------
+We used the supplied code to send ICMP packets.
+
+---------------------------
+Part 7 – Handle IP packets
+---------------------------
+In general we implement this according to the exercises description. When ICMP with the destination of some remote network is received, router checks it’s routing table for port and next hop ip to forward the packet to and sends the flow, flow’s actions are decrease
+TTL and forward packet to the port leading to the next hop.
+When ICMP packet is for router - it sends ICMP reply. We also treat the ICMP packets to other router ports - router check if received packet destination is one of it’s interfaces.
+
+------------------------
+Part 8 – Act Like Router
+------------------------
+Exactly according to description of the exercise - we used the code of ex1 from Moodle.
+
