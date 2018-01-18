@@ -1,5 +1,3 @@
-Michael Shnaiderman mshnai93
-Alona Basovich      alonaba
 
 ===============================================
 Exercise 1 – Layer 2 – Advanced Learning Switch

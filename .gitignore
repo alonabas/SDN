@@ -1,0 +1,7 @@
+*.zip
+.idea
+*.pyc
+FinalProject
+project
+.DS_Store
+.dropbox
